@@ -164,4 +164,4 @@ async function cmd(a){if(a==='resetar'&&!confirm('Apagar a simulação virtual?'
 threading.Thread(target=ciclo,daemon=True).start()
 if __name__=='__main__':
     app.run(host='0.0.0.0',port=int(os.getenv('PORT','8000')),use_reloader=False)
-        
+    
