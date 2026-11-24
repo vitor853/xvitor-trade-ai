@@ -12,7 +12,7 @@ def precos():
     for moeda in MOEDAS:
         try:
             resposta = requests.get(
-                "https://api.binance.com/api/v3/ticker/price",
+                "https://data-api.binance.vision/api/v3/ticker/price",,
                 params={"symbol": moeda + "USDT"},
                 timeout=10
             )
