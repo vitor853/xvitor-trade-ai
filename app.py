@@ -8,19 +8,25 @@ MOEDAS = ["BTC", "ETH", "SOL"]
 
 @app.route("/precos")
 def precos():
-    resultado = {}
-    for moeda in MOEDAS:
-        try:
-            resposta = requests.get(
-                "https://data-api.binance.vision/api/v3/ticker/price",,
-                params={"symbol": moeda + "USDT"},
-                timeout=10
-            )
-            resposta.raise_for_status()
-            resultado[moeda] = float(resposta.json()["price"])
-        except (requests.RequestException, KeyError, ValueError):
-            resultado[moeda] = None
+    resultado = {"BTC": None, "ETH": None, "SOL": None}
+    try:
+        resposta = requests.get(
+            "https://api.coingecko.com/api/v3/simple/price",
+            params={
+                "ids": "bitcoin,ethereum,solana",
+                "vs_currencies": "usd"
+            },
+            timeout=10
+        )
+        resposta.raise_for_status()
+        dados = resposta.json()
+        resultado["BTC"] = dados["bitcoin"]["usd"]
+        resultado["ETH"] = dados["ethereum"]["usd"]
+        resultado["SOL"] = dados["solana"]["usd"]
+    except Exception as erro:
+        app.logger.error("Erro na API: %s", erro)
     return jsonify(resultado)
+
 
 @app.route("/")
 def home():
