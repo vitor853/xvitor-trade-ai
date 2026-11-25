@@ -134,7 +134,7 @@ def proteger():
 @app.get('/health')
 def health(): return 'ok'
 
-@@app.get('/estado')
+@app.get('/estado')
 def estado():
     try:
         with LOCK:
