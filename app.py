@@ -12,6 +12,19 @@ LOCK = threading.RLock()
 MOEDAS = ('BTC','ETH','SOL')
 TAXA = .001
 STATUS = 'Aguardando cotação'
+def status_mercado(s):
+    if STATUS.startswith('Falha'):
+        return STATUS
+
+    ultimo = s.get('ultimo', 0)
+
+    if ultimo and 0 <= time.time() - ultimo <= 360:
+        return 'Mercado conectado'
+
+    if ultimo:
+        return 'Cotação desatualizada'
+
+    return 'Aguardando cotação'
 
 
 def novo():
@@ -121,12 +134,18 @@ def proteger():
 @app.get('/health')
 def health(): return 'ok'
 
-@app.get('/estado')
+@@app.get('/estado')
 def estado():
     try:
-        with LOCK: s=carregar()
-        return jsonify(**s, patrimonio=patrimonio(s),status=STATUS)
-    except Exception: return jsonify(erro='Banco indisponível'),503
+        with LOCK:
+            s = carregar()
+            return jsonify(
+                **s,
+                patrimonio=patrimonio(s),
+                status=status_mercado(s)
+            )
+    except Exception:
+        return jsonify(erro='Banco indisponível'),503
 
 @app.post('/controle/<acao>')
 def controle(acao):
@@ -148,9 +167,15 @@ def controle(acao):
 @app.get('/precos')
 def precos():
     try:
-        with LOCK: s=carregar()
-        return jsonify(precos=s['precos'],atualizado=s['ultimo'],status=STATUS)
-    except Exception: return jsonify(erro='Banco indisponível'),503
+        with LOCK:
+            s = carregar()
+            return jsonify(
+                precos=s['precos'],
+                atualizado=s['ultimo'],
+                status=status_mercado(s)
+            )
+    except Exception:
+        return jsonify(erro='Banco indisponível'),503
 
 @app.get('/')
 def home():
